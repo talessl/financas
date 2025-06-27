@@ -1,4 +1,4 @@
-# Arquivo: indices.py (VERSÃO ATUALIZADA)
+# Arquivo: indices.py (VERSÃO CORRETA para funcionar com o seu main.py)
 import pandas as pd
 import pandas_ta as ta
 
@@ -8,29 +8,29 @@ class Indices:
             raise TypeError("O dado fornecido deve ser um DataFrame do Pandas.")
         self.dados = dataframe_acao
     
-    # Adicionamos os métodos para Didi e ADX
     def didi(self):
-        self.dados.ta.sma(length=3, append=True)
-        self.dados.ta.sma(length=8, append=True)
-        self.dados.ta.sma(length=20, append=True)
+        # Especificando para usar a coluna 'Close'
+        self.dados.ta.sma(length=3, close='Close', append=True)
+        self.dados.ta.sma(length=8, close='Close', append=True)
+        self.dados.ta.sma(length=20, close='Close', append=True)
 
     def adx(self):
-        self.dados.ta.adx(append=True)
+        # Especificando todas as colunas necessárias com nomes em MAIÚSCULAS
+        self.dados.ta.adx(high='High', low='Low', close='Close', append=True)
     
     def rsi(self):
-        self.dados.ta.rsi(append=True)
+        self.dados.ta.rsi(close='Close', append=True)
     
     def stoch(self):
-        self.dados.ta.stoch(append=True)
+        self.dados.ta.stoch(high='High', low='Low', close='Close', append=True)
 
     def trix(self):
-        self.dados.ta.trix(append=True)
+        self.dados.ta.trix(close='Close', append=True)
         
     def calcular_todos(self):
-        print("\nCalculando todos os indicadores...")
-        self.didi() # <-- Adicionado
-        self.adx()  # <-- Adicionado
+        # A classe agora está pronta para calcular tudo usando os nomes corretos
+        self.didi()
+        self.adx()
         self.rsi()
         self.stoch()
         self.trix()
-        print("Cálculos finalizados.")

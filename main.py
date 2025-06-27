@@ -9,13 +9,13 @@ import indices
 # 1. PREPARAÇÃO DOS DADOS
 # ===================================================================
 print("Baixando e preparando os dados...")
-dados = yf.download("PETR4.SA", start="2023-01-01")
-dados.columns = dados.columns.droplevel(1)
-print("Colunas simplificadas:", dados.columns.to_list())
+d1 = yf.download("KEPL3.SA", start="2023-01-01")
+d1.columns = d1.columns.droplevel(1)
+print("Colunas simplificadas:", d1.columns.to_list())
 
-petrobras = indices.Indices(dataframe_acao=dados)
-petrobras.calcular_todos()
-df = petrobras.dados
+acao = indices.Indices(dataframe_acao=d1)
+acao.calcular_todos()
+df = acao.dados
 
 # ===================================================================
 # 2. DEFINIÇÃO DAS CONDIÇÕES IDEAIS (LÓGICA DO SINAL)
@@ -55,9 +55,14 @@ dados_para_plotar = df.tail(252)
 # --- A CORREÇÃO ESTÁ AQUI ---
 # Começamos com os painéis que SEMPRE existirão
 paineis_adicionais = [
+    # Painel Principal (Preço)
     mpf.make_addplot(dados_para_plotar[['SMA_3', 'SMA_8', 'SMA_20']], panel=0),
-    mpf.make_addplot(dados_para_plotar[['ADX_14', 'DMP_14', 'DMN_14']], panel=2, ylabel='ADX'),
-    mpf.make_addplot([25 for i in range(len(dados_para_plotar))], panel=2, color='gray', linestyle='--'),
+    
+    # Painel do ADX com Cores Customizadas
+    mpf.make_addplot(dados_para_plotar['ADX_14'], panel=2, color='black', width=1.2, ylabel='ADX'),
+    mpf.make_addplot(dados_para_plotar['DMP_14'], panel=2, color='green', width=0.8, linestyle='--'),
+    mpf.make_addplot(dados_para_plotar['DMN_14'], panel=2, color='red', width=0.8, linestyle='--'),
+    mpf.make_addplot([25 for i in range(len(dados_para_plotar))], panel=2, color='gray', linestyle='-.', width=0.7),
 ]
 
 # SÓ adicionamos o marcador de COMPRA se houver sinais de compra
@@ -80,7 +85,7 @@ if not sinal_venda.empty:
 mpf.plot(dados_para_plotar, 
          type='candle', 
          style='yahoo',
-         title='PETR4.SA - Sinais de Entrada/Saída Ideais',
+         title='ACAO.SA - Sinais de Entrada/Saída Ideais',
          ylabel='Preço (R$)',
          volume=True, 
          addplot=paineis_adicionais,
