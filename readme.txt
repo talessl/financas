@@ -63,3 +63,10 @@ dados['SMA3'] = dados['Close'].rolling(window=3).mean()
 dados['SMA8'] = dados['Close'].rolling(window=8).mean()
 dados['SMA20'] = dados['Close'].rolling(window=20).mean()
 # A lógica subsequente do Didi Index seria aplicada a estas colunas.
+
+Ate 10 reais
+Estocástico lento abaixo de 20 e rsi abaixo de 30 (tambem indicadores de saida)
+resultado dia
+
+storm - reversao (media de 9/72 dias comparado a de ontem)
+

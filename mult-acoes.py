@@ -9,38 +9,12 @@ import indices
 # 1. CONFIGURAÇÃO
 # ===================================================================
 
+# --- Defina aqui a lista de ações que você quer analisar ---
 LISTA_DE_ACOES = [
-    "SLCE3.SA",
-    "ALPA3.SA",
-    "BRAP4.SA",
-    "BRAP3.SA",
-    "SMTO3.SA",
-    "F2VR34.SA",
-    "USIM5.SA",
-    "USIM3.SA",
-    "GRND3.SA",
-    "BRSR6.SA",
-    "BRSR5.SA",
-    "BRSR3.SA",
-    "VAMO3.SA",
-    "GUAR3.SA",
-    "CBEE3.SA",
-    "CBAV3.SA",
-    "EZTC3.SA",
-    "FESA3.SA",
-    "FESA4.SA",
-    "BEES4.SA",
-    "BEES3.SA",
-    "BLAU3.SA",
-    "MILS3.SA",
-    "BMGB4.SA",
-    "CSED3.SA",
-    "SHUL4.SA",
-    "RANI3.SA",
-    "BRBI11.SA"
+   "BHIA3.SA"
 ]
 
-DATA_INICIO = "2023-01-01"
+DATA_INICIO = "2024-01-01"
 TICKER_PARA_VALIDAR = LISTA_DE_ACOES[0] # Valida a primeira ação da lista
 
 # ===================================================================

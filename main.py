@@ -9,7 +9,7 @@ import indices
 # 1. PREPARAÇÃO DOS DADOS
 # ===================================================================
 print("Baixando e preparando os dados...")
-d1 = yf.download("KEPL3.SA", start="2023-01-01")
+d1 = yf.download("GFSA3.SA", start="2023-01-01")
 d1.columns = d1.columns.droplevel(1)
 print("Colunas simplificadas:", d1.columns.to_list())
 
