@@ -70,3 +70,55 @@ resultado dia
 
 storm - reversao (media de 9/72 dias comparado a de ontem)
 
+
+Ate 10 reais
+Estocástico lento abaixo de 20 e rsi abaixo de 30 (tambem indicadores de saida)
+resultado dia
+
+storm - reversao (media de 9/72 dias comparado a de ontem)
+
+
+
+Estratégia de filtragrem
+
+Etapa 1: Filtros Essenciais (Qualidade e Perfil)
+Estes são os filtros não negociáveis para encontrar o tipo certo de empresa.
+
+Liquidez Média Diária
+
+Filtro: Acima de R$ 2.000.000
+
+Por quê? Sua estratégia envolve encontrar pontos de entrada e saída precisos. Uma liquidez saudável garante que você possa executar suas ordens sem dificuldade e com um spread (diferença entre compra e venda) justo.
+
+ROE (Retorno sobre o Patrimônio Líquido)
+
+Filtro: Acima de 15%
+
+Por quê? Este é seu principal filtro de qualidade. Ele garante que você só analise empresas que são altamente eficientes em gerar lucro, o que lhe dá uma segurança fundamental.
+
+P/L (Preço/Lucro)
+
+Filtro: Entre 0 e 20
+
+Por quê? Elimina empresas que dão prejuízo (<0) e aquelas que estão com preços muito "esticados" ou em bolhas de expectativa (>20). Foca em empresas de qualidade a um preço razoável (GARP - Growth at a Reasonable Price).
+
+Valor de Mercado
+
+Filtro: Entre R$ 500 Milhões e R$ 20 Bilhões
+
+Por quê? Foca o scanner em Small e Mid Caps, que, como vimos, tendem a formar as tendências mais claras e ter maior potencial de valorização que a sua estratégia busca capturar.
+
+Etapa 2: Filtros de Cenário Técnico (O "Pulo do Gato")
+Aqui está a grande mudança. Em vez de procurar ações que simplesmente caíram, vamos procurar ações que estão em um estado técnico neutro ou "prontas para a ignição".
+
+ADX (14)
+
+Filtro: Acima de 20
+
+Por quê? Este é um pré-filtro genial para a sua estratégia. Ele elimina todas as ações que estão andando de lado, sem tendência nenhuma. Você só vai gastar tempo analisando papéis que já demonstram ter alguma força direcional, seja de alta ou de baixa.
+
+IFR (RSI) (14)
+
+Filtro: Entre 35 e 65
+
+Por quê? Este é o seu filtro "Goldilocks" (Cachinhos Dourados). Você não quer ações extremamente sobrevendidas (<30), pois podem estar em queda livre. E também não quer ações extremamente sobrecompradas (>70), pois sua lógica de compra não funcionaria. Ao buscar ações na faixa intermediária, você encontra papéis que estão "descansando" e prontos para iniciar o próximo movimento, que é o momento ideal para um sinal do seu scanner.

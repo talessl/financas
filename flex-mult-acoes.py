@@ -9,6 +9,7 @@ import indices
 # 1. CONFIGURAÇÃO
 # ===================================================================
 
+# --- Defina aqui a lista de ações que você quer analisar ---
 LISTA_DE_ACOES = [
     "GFSA3.SA",
     "RCSL3.SA",
