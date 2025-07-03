@@ -79,7 +79,7 @@ storm - reversao (media de 9/72 dias comparado a de ontem)
 
 
 
-Estratégia de filtragrem
+Estratégia de filtragrem - FUNDAMENTALISTA
 
 Etapa 1: Filtros Essenciais (Qualidade e Perfil)
 Estes são os filtros não negociáveis para encontrar o tipo certo de empresa.
