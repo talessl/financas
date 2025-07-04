@@ -10,16 +10,7 @@ import indices
 # ===================================================================
 
 # --- Defina aqui a lista de ações que você quer analisar ---
-LISTA_DE_ACOES = [
-    "GFSA3.SA",
-    "RCSL3.SA",
-    "AZUL4.SA",
-    "WEST3.SA",
-    "SNSY5.SA",
-    "BHIA3.SA",
-    "AVLL3.SA",
-    "PMAM3.SA"
-]
+LISTA_DE_ACOES = ['AALR3.SA', 'AVLL3.SA', 'AZEV4.SA', 'AZUL4.SA', 'BHIA3.SA', 'CEED3.SA', 'CRPG5.SA', 'GFSA3.SA', 'GSHP3.SA', 'MGEL4.SA', 'RCSL3.SA', 'RDNI3.SA', 'RNEW11.SA', 'RNEW3.SA', 'RNEW4.SA', 'SMTO3.SA', 'SNSY5.SA']
 
 LIMITE = 2
 

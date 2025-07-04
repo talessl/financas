@@ -1,4 +1,3 @@
-# Arquivo: indices.py (VERSÃO CORRETA para funcionar com o seu main.py)
 import pandas as pd
 import pandas_ta as ta
 
