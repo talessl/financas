@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Baixamos os dados do último dia para todas as ações da lista.
     # É muito mais rápido do que baixar uma por uma.
     dados = yf.download(
-        tickers=resultado_provisorio,
+        tickers=acoes,
         period="1d",
         progress=False
     )

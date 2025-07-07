@@ -25,9 +25,15 @@ class Indices:
 
     def trix(self):
         self.dados.ta.trix(close='Close', append=True)
+
+    def pfr(self):
+        self.dados.ta.sma(close='Close',length=9, append=True)
+        self.dados.ta.sma(close='Close',length=21, append=True)
+        self.dados.ta.sma(close='Close', length=72, append=True)
         
     def calcular_todos(self):
         # A classe agora está pronta para calcular tudo usando os nomes corretos
+        self.pfr()
         self.didi()
         self.adx()
         self.rsi()

@@ -10,11 +10,11 @@ import indices
 # ===================================================================
 
 # --- Defina aqui a lista de ações que você quer analisar ---
-LISTA_DE_ACOES = ['AALR3.SA', 'AVLL3.SA', 'AZEV4.SA', 'AZUL4.SA', 'BHIA3.SA', 'CEED3.SA', 'CRPG5.SA', 'GFSA3.SA', 'GSHP3.SA', 'MGEL4.SA', 'RCSL3.SA', 'RDNI3.SA', 'RNEW11.SA', 'RNEW3.SA', 'RNEW4.SA', 'SMTO3.SA', 'SNSY5.SA']
+LISTA_DE_ACOES = ['AVLL3.SA', 'AZEV4.SA', 'AZUL4.SA', 'CEED3.SA', 'MGEL4.SA', 'RCSL3.SA', 'RDNI3.SA', 'RNEW11.SA', 'RNEW3.SA', 'RNEW4.SA', 'SEQL3.SA', 'SNSY5.SA', 'TRIS3.SA', 'WHRL4.SA']
 
 LIMITE = 2
 
-DATA_INICIO = "2023-01-01"
+DATA_INICIO = "2025-01-01"
 TICKER_PARA_VALIDAR = LISTA_DE_ACOES[0] # Valida a primeira ação da lista
 
 # ===================================================================
@@ -25,43 +25,40 @@ TICKER_PARA_VALIDAR = LISTA_DE_ACOES[0] # Valida a primeira ação da lista
 
 def analisar_sinais_para_acao(ticker, limite_de_sinais=4, dias_para_verificar=3):
     """
-    Analisa um ticker usando um sistema de pontuação e verifica os últimos X dias.
-    'limite_de_sinais': número mínimo de condições para um dia ser considerado um "sinal".
-    'dias_para_verificar': a janela de tempo recente que nos interessa (ex: 3 dias).
+    Analisa um ticker, imprime um detalhamento dos indicadores que pontuaram,
+    e retorna um resumo do sinal.
     """
     print(f"--- Analisando {ticker}... ---")
     try:
         dados = yf.download(ticker, start=DATA_INICIO, progress=False)
         if dados.empty: return "Dados Insuficientes", None
         
-        dados.columns = dados.columns.droplevel(1)
+        # Garante que as colunas não sejam MultiIndex
+        if isinstance(dados.columns, pd.MultiIndex):
+            dados.columns = dados.columns.droplevel(1)
         
         acao = indices.Indices(dataframe_acao=dados)
         acao.calcular_todos()
         df = acao.dados
         
         # --- Lógica de Condições e Score ---
-        # --- LÓGICA DE CONDIÇÕES MAIS FLEXÍVEL ---
-        # ADX: Uma tendência "suficiente" já pode começar com ADX acima de 22
         cond_adx_compra = (df['ADX_14'] > 22) & (df['DMP_14'] > df['DMN_14'])
-
-        # DIDI: Talvez a "agulhada" completa seja rara. Que tal apenas o cruzamento da média rápida com a intermediária?
         cond_didi_compra = (df['SMA_3'].shift(1) < df['SMA_8'].shift(1)) & (df['SMA_3'] > df['SMA_8'])
-
-        # TRIX: O cruzamento do zero continua sendo um bom sinal
         cond_trix_compra = (df['TRIX_30_9'].shift(1) < 0) & (df['TRIX_30_9'] > 0)
-
-        # ESTOCÁSTICO: Podemos exigir apenas o cruzamento, sem que ele precise estar na zona de sobrevenda
         cond_stoch_compra = (df['STOCHk_14_3_3'].shift(1) < df['STOCHd_14_3_3'].shift(1)) & \
-                            (df['STOCHk_14_3_3'] > df['STOCHd_14_3_3'])
-
-        # RSI: Em vez de < 40, podemos aceitar qualquer valor que não esteja sobrecomprado (ex: < 55)
+                              (df['STOCHk_14_3_3'] > df['STOCHd_14_3_3'])
         cond_rsi_compra = df['RSI_14'] < 55
 
-        # O sistema de Score continua o mesmo, mas agora com condições mais fáceis de serem atingidas
-        df['score_compra'] = (cond_adx_compra.astype(int) + cond_didi_compra.astype(int) + 
-                            cond_trix_compra.astype(int) + cond_stoch_compra.astype(int) + 
-                            cond_rsi_compra.astype(int))
+        condicoes_compra = {
+            "ADX (Força + Direção de Alta)": cond_adx_compra,
+            "DIDI (Cruzamento de Compra)": cond_didi_compra,
+            "TRIX (Cruzamento p/ Cima)": cond_trix_compra,
+            "Estocástico (Cruzamento de Compra)": cond_stoch_compra,
+            "RSI (Não Sobrecomprado)": cond_rsi_compra
+        }
+
+        # <<< CORREÇÃO 1: Usando o dicionário para calcular o score >>>
+        df['score_compra'] = sum(cond.astype(int) for cond in condicoes_compra.values())
 
         cond_adx_venda = (df['ADX_14'] > 25) & (df['DMN_14'] > df['DMP_14'])
         cond_didi_venda = ((df['SMA_3'].shift(1) > df['SMA_8'].shift(1)) & (df['SMA_3'] < df['SMA_8'])) & \
@@ -70,29 +67,46 @@ def analisar_sinais_para_acao(ticker, limite_de_sinais=4, dias_para_verificar=3)
         cond_stoch_venda = (df['STOCHk_14_3_3'].shift(1) > df['STOCHd_14_3_3'].shift(1)) & \
                            (df['STOCHk_14_3_3'] < df['STOCHd_14_3_3']) & (df['STOCHk_14_3_3'] > 70)
         cond_rsi_venda = df['RSI_14'] > 60
+
+        condicoes_venda = {
+            "ADX (Força + Direção de Baixa)": cond_adx_venda,
+            "DIDI (Agulhada de Venda)": cond_didi_venda,
+            "TRIX (Cruzamento p/ Baixo)": cond_trix_venda,
+            "Estocástico (Cruzamento de Venda em Sobrecompra)": cond_stoch_venda,
+            "RSI (Sobrecomprado)": cond_rsi_venda
+        }
         
-        df['score_venda'] = (cond_adx_venda.astype(int) + cond_didi_venda.astype(int) + 
-                             cond_trix_venda.astype(int) + cond_stoch_venda.astype(int) + 
-                             cond_rsi_venda.astype(int))
+        # <<< CORREÇÃO 1: Usando o dicionário para calcular o score >>>
+        df['score_venda'] = sum(cond.astype(int) for cond in condicoes_venda.values())
         
-        # --- LÓGICA DE VERIFICAÇÃO FINAL MODIFICADA ---
+        # --- Lógica de Verificação e Impressão de Detalhes ---
         status_final = "Sem Sinal Relevante"
-        
-        # Pegamos apenas os últimos dias para análise
         df_recente = df.tail(dias_para_verificar)
         
-        # Contamos quantos dias nos últimos X dias tiveram um score alto
-        contagem_compra = (df_recente['score_compra'] >= limite_de_sinais).sum()
-        contagem_venda = (df_recente['score_venda'] >= limite_de_sinais).sum()
-
-        if contagem_compra > 0:
-            # Pega o score do último dia para dar mais contexto
+        # Verifica Sinais de Compra
+        dias_sinal_compra = df_recente[df_recente['score_compra'] >= limite_de_sinais]
+        if not dias_sinal_compra.empty:
             score_hoje = df.iloc[-1]['score_compra']
-            status_final = f"COMPRA ({contagem_compra} sinal/sinais nos últimos {dias_para_verificar} dias. Score hoje: {score_hoje:.0f})"
-        elif contagem_venda > 0:
-            score_hoje = df.iloc[-1]['score_venda']
-            status_final = f"VENDA ({contagem_venda} sinal/sinais nos últimos {dias_para_verificar} dias. Score hoje: {score_hoje:.0f})"
+            status_final = f"COMPRA ({len(dias_sinal_compra)} sinal/sinais nos últimos {dias_para_verificar} dias. Score hoje: {score_hoje:.0f})"
             
+            print(f"  -> DETALHE DO SINAL DE COMPRA para {ticker}:")
+            for data, linha in dias_sinal_compra.iterrows():
+                # <<< CORREÇÃO 2: Verificando o valor diretamente na condição >>>
+                indicadores_ativos = [nome for nome, cond in condicoes_compra.items() if cond.loc[data]]
+                print(f"     - Em {data.date()}: Score {linha['score_compra']:.0f} -> ({', '.join(indicadores_ativos)})")
+
+        # Verifica Sinais de Venda
+        dias_sinal_venda = df_recente[df_recente['score_venda'] >= limite_de_sinais]
+        if not dias_sinal_venda.empty:
+            score_hoje = df.iloc[-1]['score_venda']
+            status_final = f"VENDA ({len(dias_sinal_venda)} sinal/sinais nos últimos {dias_para_verificar} dias. Score hoje: {score_hoje:.0f})"
+
+            print(f"  -> DETALHE DO SINAL DE VENDA para {ticker}:")
+            for data, linha in dias_sinal_venda.iterrows():
+                # <<< CORREÇÃO 2: Verificando o valor diretamente na condição >>>
+                indicadores_ativos = [nome for nome, cond in condicoes_venda.items() if cond.loc[data]]
+                print(f"     - Em {data.date()}: Score {linha['score_venda']:.0f} -> ({', '.join(indicadores_ativos)})")
+                
         return status_final, df
 
     except Exception as e:
