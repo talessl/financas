@@ -3,7 +3,19 @@ import pandas_ta as ta
 import pandas as pd
 
 
-acoes = [
+
+
+PRECO_MAXIMO = 10.0
+
+
+# ===================================================================
+# 2. EXECUÇÃO DO SCANNER
+# ===================================================================
+
+def acoes_baratas():
+    print(f"Buscando ações na lista com preço abaixo de R$ {PRECO_MAXIMO:.2f}...")
+
+    acoes = [
     "AALR3.SA", "ABCB4.SA", "ABEV3.SA", "AERI3.SA", "AFLT3.SA", "AGRO3.SA", "AGXY3.SA",
     "ALLD3.SA", "ALPA3.SA", "ALPA4.SA", "ALPK3.SA", "ALOS3.SA", "ALUP11.SA", "ALUP3.SA",
     "ALUP4.SA", "AMAR3.SA", "AMBP3.SA", "AMER3.SA", "AMOB3.SA", "ANIM3.SA", "ARML3.SA",
@@ -55,16 +67,6 @@ acoes = [
     "USIM3.SA", "USIM5.SA", "VALE3.SA", "VAMO3.SA", "VBBR3.SA", "VIVA3.SA", "VIVR3.SA",
     "VIVT3.SA", "VITT3.SA", "VLID3.SA", "VULC3.SA", "VSTE3.SA", "WEGE3.SA", "WHRL3.SA",
     "WHRL4.SA", "WIZC3.SA", "WLMM3.SA", "WLMM4.SA", "YDUQ3.SA", "ZAMP3.SA" ]
-
-PRECO_MAXIMO = 10.0
-
-resultado_provisorio = ['AALR3.SA', 'AVLL3.SA', 'AZEV4.SA', 'AZUL4.SA', 'BDLL4.SA', 'BHIA3.SA', 'BRSR5.SA', 'CEDO3.SA', 'CEED3.SA', 'CRPG3.SA', 'CRPG5.SA', 'CTKA3.SA', 'EKTR3.SA', 'ENMT4.SA', 'FRIO3.SA', 'GFSA3.SA', 'GSHP3.SA', 'MGEL4.SA', 'MOAR3.SA', 'MWET4.SA', 'RCSL3.SA', 'RDNI3.SA', 'RNEW11.SA', 'RNEW3.SA', 'RNEW4.SA', 'SMTO3.SA', 'SNSY5.SA', 'WLMM3.SA', 'WLMM4.SA']
-# ===================================================================
-# 2. EXECUÇÃO DO SCANNER
-# ===================================================================
-
-if __name__ == "__main__":
-    print(f"Buscando ações na lista com preço abaixo de R$ {PRECO_MAXIMO:.2f}...")
     
     # Baixamos os dados do último dia para todas as ações da lista.
     # É muito mais rápido do que baixar uma por uma.
@@ -95,6 +97,7 @@ if __name__ == "__main__":
     print(f"           Análise do dia: {pd.Timestamp.today().date()}")
     print("="*50)
 
+
     if acoes_filtradas.empty:
         print("\nNenhuma ação na lista atendeu ao critério de preço.")
     else:
@@ -105,3 +108,5 @@ if __name__ == "__main__":
         print(lista_de_tickers)
 
     print("="*50)
+    
+    return lista_de_tickers

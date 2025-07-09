@@ -4,13 +4,14 @@ import numpy as np
 import yfinance as yf
 import mplfinance as mpf
 import indices
+import filtro
 
 # ===================================================================
 # 1. CONFIGURAÇÃO
 # ===================================================================
 
 # --- Defina aqui a lista de ações que você quer analisar ---
-LISTA_DE_ACOES = ['AVLL3.SA', 'AZEV4.SA', 'AZUL4.SA', 'CEED3.SA', 'MGEL4.SA', 'RCSL3.SA', 'RDNI3.SA', 'RNEW11.SA', 'RNEW3.SA', 'RNEW4.SA', 'SEQL3.SA', 'SNSY5.SA', 'TRIS3.SA', 'WHRL4.SA']
+LISTA_DE_ACOES = filtro.acoes_stoch_rsi_filtradas
 
 LIMITE = 2
 
