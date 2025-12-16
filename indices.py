@@ -5,7 +5,12 @@ class Indices:
     def __init__(self, dataframe_acao):
         if not isinstance(dataframe_acao, pd.DataFrame):
             raise TypeError("O dado fornecido deve ser um DataFrame do Pandas.")
+        if isinstance(dataframe_acao.columns, pd.MultiIndex):
+            
+            dataframe_acao.columns = dataframe_acao.columns.get_level_values(0)
+        
         self.dados = dataframe_acao
+
     
     def didi(self):
         # Especificando para usar a coluna 'Close'
@@ -31,11 +36,3 @@ class Indices:
         self.dados.ta.sma(close='Close',length=21, append=True)
         self.dados.ta.sma(close='Close', length=72, append=True)
         
-    def calcular_todos(self):
-        # A classe agora está pronta para calcular tudo usando os nomes corretos
-        self.pfr()
-        self.didi()
-        self.adx()
-        self.rsi()
-        self.stoch()
-        self.trix()

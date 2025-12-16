@@ -1,11 +1,10 @@
 import yfinance as yf
-import pandas_ta as ta
 import pandas as pd
 
 
 
 
-PRECO_MAXIMO = 10.0
+PRECO_MAXIMO = 5
 
 
 # ===================================================================
@@ -68,6 +67,8 @@ def acoes_baratas():
     "VIVT3.SA", "VITT3.SA", "VLID3.SA", "VULC3.SA", "VSTE3.SA", "WEGE3.SA", "WHRL3.SA",
     "WHRL4.SA", "WIZC3.SA", "WLMM3.SA", "WLMM4.SA", "YDUQ3.SA", "ZAMP3.SA" ]
     
+    print(f"Quantidade total de ações: {len(acoes)}")
+
     # Baixamos os dados do último dia para todas as ações da lista.
     # É muito mais rápido do que baixar uma por uma.
     dados = yf.download(
@@ -108,5 +109,8 @@ def acoes_baratas():
         print(lista_de_tickers)
 
     print("="*50)
+    print(f"Quantidade de ações encontradas: {len(lista_de_tickers)}")
     
     return lista_de_tickers
+
+acoes_baratas()
