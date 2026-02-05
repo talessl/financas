@@ -77,8 +77,17 @@ def acoes_baratas():
         progress=False
     )
     
+    
     # O resultado vem com MultiIndex. Acessamos apenas os dados de fechamento ('Close').
     precos_de_fechamento = dados['Close']
+    
+    if precos_de_fechamento.empty:
+        print("Aviso: Não foi possível obter dados de preços.")
+        return None  # ou return pd.DataFrame() dependendo do que sua função deve retornar
+    
+    if len(precos_de_fechamento) == 0:
+        print("Aviso: DataFrame de preços está vazio.")
+        return None
     
     # Pegamos a última linha de preços, que corresponde ao fechamento mais recente
     ultimos_precos = precos_de_fechamento.iloc[-1]
@@ -112,5 +121,3 @@ def acoes_baratas():
     print(f"Quantidade de ações encontradas: {len(lista_de_tickers)}")
     
     return lista_de_tickers
-
-acoes_baratas()

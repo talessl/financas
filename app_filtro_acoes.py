@@ -301,9 +301,20 @@ with st.sidebar:
 # EXECUÇÃO PRINCIPAL
 # ==========================================
 if executar:
+    # 1. Tenta carregar os tickers
     with st.spinner("Carregando lista de ações baratas (acoesB3)..."):
-        tickers = acoesB3.acoes_baratas()
-    
+        try:
+            tickers = acoesB3.acoes_baratas()
+        except Exception as e:
+            st.error(f"Erro ao buscar lista de ações: {e}")
+            tickers = None
+
+    # 2. Verifica se a lista é válida antes de continuar
+    if tickers is None or len(tickers) == 0:
+        st.error("❌ A lista de ações retornou vazia ou nula. Verifique sua conexão ou o arquivo 'acoesB3.py'.")
+        st.stop() # Interrompe a execução aqui para não quebrar o app
+
+    # Se chegou aqui, tickers é válido
     st.write(f"🔎 Analisando **{len(tickers)}** ativos com a estratégia: **{escolha}**")
     
     start_time = time.time()

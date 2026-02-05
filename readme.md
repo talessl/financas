@@ -1,8 +1,8 @@
 # Livro de Estratégias e Indicadores de Análise Técnica
 
-Este documento centraliza as definições de indicadores técnicos, estratégias de rastreamento (scanner) e os códigos para implementação.
+Este documento centraliza as definições de indicadores técnicos e os códigos para implementação.
 
-## Pré-requisitos
+## Pré-requisitos (v1)
 
 É necessária a utilização de uma versão python abaixo de 3.14, devido a incompatibilidade com numba.
 Comando para executar o projeto com python/streamlit: python -m streamlit run app_filtro_acoes.py
@@ -80,26 +80,6 @@ Combinação de filtros fundamentalistas e técnicos para encontrar ações com 
 
 Filtros não negociáveis para encontrar o tipo certo de empresa (GARP - Growth at a Reasonable Price).
 
-#### Liquidez Média Diária
-
-- **Filtro:** Acima de R$ 2.000.000
-  > **Por quê?** Garante que seja possível executar ordens de compra/venda sem dificuldade e com um spread justo.
-
-#### ROE (Retorno sobre o Patrimônio Líquido)
-
-- **Filtro:** Acima de 15%
-  > **Por quê?** Filtro principal de qualidade. Garante que a análise foque em empresas eficientes em gerar lucro.
-
-#### P/L (Preço/Lucro)
-
-- **Filtro:** Entre 0 e 20
-  > **Por quê?** Elimina empresas com prejuízo (P/L < 0) e empresas com preços "esticados" (P/L > 20).
-
-#### Valor de Mercado
-
-- **Filtro:** Entre R$ 500 Milhões e R$ 20 Bilhões
-  > **Por quê?** Foca o scanner em Small e Mid Caps, que tendem a formar tendências mais claras e com maior potencial de valorização.
-
 ### Etapa 2: Filtros de Cenário Técnico (Timing)
 
 Filtros para encontrar ações que estão em um estado técnico neutro ou "prontas para a ignição".
@@ -113,34 +93,3 @@ Filtros para encontrar ações que estão em um estado técnico neutro ou "pront
 
 - **Filtro:** Entre 35 e 65
   > **Por quê?** Filtro "Goldilocks". Evita ações extremamente sobrevendidas (<30, podem estar em queda livre) ou sobrecompradas (>70). Busca papéis que estão "descansando" e prontos para o próximo movimento.
-
----
-
-## 3. Implementação em Python (pandas-ta)
-
-Exemplos de código para calcular os indicadores usando a biblioteca `pandas-ta`.
-
-```python
-import pandas as pd
-import pandas_ta as ta
-
-# Supondo que 'dados' é o seu DataFrame com colunas 'Open', 'High', 'Low', 'Close', 'Volume'
-
-# Calcular IFR, Estocástico Lento e TRIX
-# A biblioteca pandas-ta adiciona as colunas diretamente ao DataFrame (append=True)
-dados.ta.rsi(append=True)
-dados.ta.stoch(append=True)
-dados.ta.trix(append=True)
-
-# Calcular ADX (que inclui DI+ e DI-)
-dados.ta.adx(append=True)
-
-# --- Cálculo Manual (Exemplo: DIDI Index) ---
-# A biblioteca pandas-ta não possui o Didi Index nativo.
-dados['SMA3'] = dados['Close'].rolling(window=3).mean()
-dados['SMA8'] = dados['Close'].rolling(window=8).mean()
-dados['SMA20'] = dados['Close'].rolling(window=20).mean()
-
-# A lógica subsequente do Didi Index (cruzamentos, etc.)
-# seria aplicada sobre estas novas colunas.
-```
