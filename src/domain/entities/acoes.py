@@ -1,5 +1,5 @@
 from typing import List
-from domain.value_objects.market_data import MarketData
+from src.domain.value_objects.market_data import MarketData
 
 class Acao: # Singular geralmente faz mais sentido para Entidade
     def __init__(self, ticker: str, historico: List[MarketData]):

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Ações</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>StockAnalyzer</h1>
+            <p>Consulte dados históricos de ações</p>
+        </header>
+
+        <section class="search-box">
+            <form action="/analisar" method="post" class="search-form">
+                <input type="text" id="ticker" name="ticker" class="search-input" placeholder="Digite o Ticker (ex: PETR4.SA)" required>
+                <button type="submit" class="search-btn">Analisar</button>
+            </form>
+        </section>
+
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+
+        {% if acao %}
+            <section class="result-card">
+                <h2>Resumo: {{ acao.ticker }}</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Preço Atual</span>
+                        <span class="metric-value">R$ {{ "%.2f"|format(acao.historico[-1].close) }}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Máxima (30d)</span>
+                        <span class="metric-value">R$ {{ "%.2f"|format(maxima) }}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Mínima (30d)</span>
+                        <span class="metric-value">R$ {{ "%.2f"|format(minima) }}</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="meuGrafico"></canvas>
+                </div>
+
+            </section>
+        {% endif %}
+    </div>
+
+    {% if acao %}
+    <script>
+        // 1. Recebendo as listas do Python usando o Jinja2 (o filtro | safe garante que venha como Array do JS)
+        const rotulos = {{ datas_grafico | safe }};
+        const dadosPreco = {{ precos_grafico | safe }};
+
+        // 2. Configurando o Chart.js
+        const ctx = document.getElementById('meuGrafico').getContext('2d');
+        const meuGrafico = new Chart(ctx, {
+            type: 'line', // Tipo do gráfico (linha)
+            data: {
+                labels: rotulos, // Eixo X (Datas)
+                datasets: [{
+                    label: 'Preço de Fechamento (R$)',
+                    data: dadosPreco, // Eixo Y (Preços)
+                    borderColor: '#2563eb', // Cor da linha (o azul do nosso tema)
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)', // Cor do preenchimento embaixo da linha
+                    borderWidth: 2,
+                    fill: true, // Preenche o espaço abaixo da linha
+                    tension: 0.3 // Deixa a linha curvada/suave em vez de reta e pontiaguda
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Permite que o gráfico preencha a div chart-container
+                plugins: {
+                    legend: {
+                        display: false // Esconde a legenda extra para ficar mais limpo
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false // Não começa do zero para a variação ficar mais visível
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
+</body>
+</html>
