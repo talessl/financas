@@ -2,11 +2,6 @@
 
 Este documento centraliza as definições de indicadores técnicos e os códigos para implementação.
 
-## Pré-requisitos (v1)
-
-É necessária a utilização de uma versão python abaixo de 3.14, devido a incompatibilidade com numba.
-Comando para executar o projeto com python/streamlit: python -m streamlit run app_filtro_acoes.py
-
 ## 1. Definições de Indicadores Técnicos
 
 Uma referência rápida sobre os principais indicadores utilizados.
@@ -82,7 +77,7 @@ Filtros não negociáveis para encontrar o tipo certo de empresa (GARP - Growth 
 
 ### Etapa 2: Filtros de Cenário Técnico (Timing)
 
-Filtros para encontrar ações que estão em um estado técnico neutro ou "prontas para a ignição".
+Filtros para encontrar ações que estão em um estado técnico neutro ou "prontas para a ignição". Necessário ao menos 30 períodos.
 
 #### ADX (14)
 
