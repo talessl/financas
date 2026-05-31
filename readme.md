@@ -1,6 +1,18 @@
 # Guia de Execução
 
-Na raiz do projeto (\financas), execute o comando:
+O código foi feito em python. É indicado a utilização de um virtual environment para a instalação das bibliotecas pré-requisitadas. Para isso, execute o código:
+
+```
+python -m venv venv
+```
+
+e depois, utilize o requiremets do projeto:
+
+```
+pip install -r requirements.txt
+```
+
+Com o ambiente configurado, abra o prompt na raiz do projeto (\financas) e execute o comando:
 
 ```
 uvicorn src.infrastructure.web.main:app --reload
@@ -8,9 +20,12 @@ uvicorn src.infrastructure.web.main:app --reload
 
 A página principal é uma simples pesquisa da ação desejada, com informações referente ao preço atual, máxima (30 dias) e mínima (30 dias).
 
+Não é necessária formatação para pesquisa.
+Ex: Para pesquisar por DASA.3, basta digitar dasa3.
+
 A opção "Visualizar Ações do Dia", tem por objetivo aplicar um filtro de Estocástico Lento < 20 e IFR (RSI) < 30 para todas as ações da B3.
 
-Obs: Melhoria de experiência da visualização de ações em desenvolvimento.
+Obs: Melhoria de experiência de consulta de ações em desenvolvimento.
 
 ## Livro de Estratégias e Indicadores de Análise Técnica
 
