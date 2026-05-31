@@ -1,4 +1,18 @@
-# Livro de Estratégias e Indicadores de Análise Técnica
+# Guia de Execução
+
+Na raiz do projeto (\financas), execute o comando:
+
+```
+uvicorn src.infrastructure.web.main:app --reload
+```
+
+A página principal é uma simples pesquisa da ação desejada, com informações referente ao preço atual, máxima (30 dias) e mínima (30 dias).
+
+A opção "Visualizar Ações do Dia", tem por objetivo aplicar um filtro de Estocástico Lento < 20 e IFR (RSI) < 30 para todas as ações da B3.
+
+Obs: Melhoria de experiência da visualização de ações em desenvolvimento.
+
+## Livro de Estratégias e Indicadores de Análise Técnica
 
 Este documento centraliza as definições de indicadores técnicos e os códigos para implementação.
 
@@ -79,12 +93,6 @@ Filtros não negociáveis para encontrar o tipo certo de empresa (GARP - Growth 
 
 Filtros para encontrar ações que estão em um estado técnico neutro ou "prontas para a ignição". Necessário ao menos 30 períodos.
 
-#### ADX (14)
+#### Estratégia atual
 
-- **Filtro:** Acima de 20
-  > **Por quê?** Elimina ações que estão "andando de lado" (sem tendência). Foca a análise apenas em papéis que já demonstram força direcional.
-
-#### IFR (RSI) (14)
-
-- **Filtro:** Entre 35 e 65
-  > **Por quê?** Filtro "Goldilocks". Evita ações extremamente sobrevendidas (<30, podem estar em queda livre) ou sobrecompradas (>70). Busca papéis que estão "descansando" e prontos para o próximo movimento.
+Estocástico Lento abaixo de 20 e IFR (RSI) abaixo de 30.

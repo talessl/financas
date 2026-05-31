@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pesquisa de Ações</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>StockAnalyzer</h1>
+        <p>Catálogo e Pesquisa de Ações</p>
+      </header>
+
+      <a href="/" class="nav-link">← Voltar para a Home</a>
+
+      <section class="search-box" style="text-align: center">
+        <h2 style="margin-bottom: 1rem; color: var(--text-main)">
+          Scanner de Oportunidades
+        </h2>
+        <p style="margin-bottom: 1.5rem; color: var(--text-muted)">
+          Filtra ações sobrevendidas: <strong>Estocástico Lento < 20</strong> e
+          <strong>IFR (RSI) < 30</strong>.
+        </p>
+
+        <form
+          action="/buscar_acoes"
+          method="get"
+          class="search-form"
+          style="justify-content: center"
+        >
+          <button
+            type="submit"
+            class="search-btn"
+            style="padding: 1rem 2rem; font-size: 1.1rem"
+          >
+            🔍 Buscar Oportunidades Agora
+          </button>
+        </form>
+      </section>
+
+      {% if error %}
+      <div
+        class="error-msg"
+        style="color: red; padding: 10px; text-align: center"
+      >
+        {{ error }}
+      </div>
+      {% endif %} {% if lista_acoes %}
+      <section class="result-card">
+        <h2>Resultados Encontrados</h2>
+
+        <div class="table-container">
+          <table class="stocks-table">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Empresa</th>
+                <th>Setor</th>
+                <th>Preço Atual</th>
+                <th style="text-align: center">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for acao in lista_acoes %}
+              <tr>
+                <td><strong>{{ acao.ticker }}</strong></td>
+                <td>{{ acao.nome }}</td>
+                <td>{{ acao.setor }}</td>
+                <td>R$ {{ "%.2f"|format(acao.preco) }}</td>
+
+                <td style="text-align: center">
+                  <form action="/analisar" method="post" style="margin: 0">
+                    <input
+                      type="hidden"
+                      name="ticker"
+                      value="{{ acao.ticker }}"
+                    />
+                    <button
+                      type="submit"
+                      class="search-btn"
+                      style="
+                        padding: 0.4rem 0.8rem;
+                        font-size: 0.85rem;
+                        background-color: var(--primary-color);
+                      "
+                    >
+                      📊 Ver Gráfico
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+  </body>
+</html>
