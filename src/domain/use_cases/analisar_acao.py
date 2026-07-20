@@ -5,7 +5,6 @@ from typing import List, Dict
 
 
 class AnalisarAcao:
-    # AQUI acontece a Mágica da Injeção de Dependência.
     def __init__(self, provider: IDataProvider):
         self.provider = provider
 
@@ -13,12 +12,13 @@ class AnalisarAcao:
         hoje = date.today()
         inicio = hoje - timedelta(days=45)
 
-        dados = self.provider.buscar_dados(ticker, inicio, hoje)
+        dados = self.provider._baixar_dados(ticker, inicio, hoje)
         if not dados:
             return None
 
         return Acao(ticker=ticker, historico=dados)
 
+    # usecase
     def escanear_oportunidades(self, tickers: List[str], preco_maximo: float = 10.0) -> List[Dict]:
         """
         Coordena o scanner aplicando o filtro de preço máximo e indicadores técnicos.

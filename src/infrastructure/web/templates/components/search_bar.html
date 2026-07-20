@@ -1,0 +1,26 @@
+<section class="search-box">
+  <header class="header" style="margin-bottom: 15px">
+    <h1>StockAnalyzer</h1>
+    <a href="/acoes" class="nav-link" style="font-size: 0.9em"
+      >Visualizar Ações do Dia</a
+    >
+  </header>
+
+  <form action="/analisar" method="post" class="search-form">
+    <input
+      type="text"
+      id="ticker"
+      name="ticker"
+      class="search-input"
+      placeholder="Digite o Ticker (ex: PETR4.SA)"
+      required
+    />
+    <button
+      type="submit"
+      class="search-btn"
+      style="width: 100%; margin-top: 10px"
+    >
+      Analisar
+    </button>
+  </form>
+</section>

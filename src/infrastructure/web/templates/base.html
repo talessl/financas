@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}StockAnalyzer - Home Broker{% endblock %}</title>
+    <!-- Mantemos o Chart.js por enquanto para não quebrar o gráfico atual -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <!-- Aqui é onde o conteúdo das outras páginas será injetado -->
+    {% block content %}{% endblock %}
+  </body>
+</html>

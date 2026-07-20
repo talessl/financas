@@ -1,103 +1,159 @@
-<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Análise de Ações</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="/static/styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <header class="header">
-        <h1>StockAnalyzer</h1>
-        <p>Consulte dados históricos de ações</p>
-      </header>
-
-      <a href="/acoes" class="nav-link">Visualizar Ações do Dia</a>
-
-      <section class="search-box">
-        <form action="/analisar" method="post" class="search-form">
-          <input
-            type="text"
-            id="ticker"
-            name="ticker"
-            class="search-input"
-            placeholder="Digite o Ticker (ex: PETR4.SA)"
-            required
-          />
-          <button type="submit" class="search-btn">Analisar</button>
-        </form>
-      </section>
-
-      {% if error %}
-      <div class="error-msg">{{ error }}</div>
-      {% endif %} {% if acao %}
-      <section class="result-card">
-        <h2>Resumo: {{ acao.ticker }}</h2>
-
-        <div class="metrics-grid">
-          <div class="metric-item">
-            <span class="metric-label">Preço Atual</span>
-            <span class="metric-value"
-              >R$ {{ "%.2f"|format(acao.historico[-1].close) }}</span
-            >
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Máxima (30d)</span>
-            <span class="metric-value">R$ {{ "%.2f"|format(maxima) }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Mínima (30d)</span>
-            <span class="metric-value">R$ {{ "%.2f"|format(minima) }}</span>
-          </div>
-        </div>
-
-        <div class="chart-container">
-          <canvas id="meuGrafico"></canvas>
-        </div>
-      </section>
-      {% endif %}
+{% extends "base.html" %} {% block content %}
+<div class="homebroker-container">
+  <!-- BARRA LATERAL (Controles e Resumo) -->
+  <aside class="sidebar">
+    {% include "components/search_bar.html" %} {% if error %}
+    <div class="error-msg" style="margin-top: 15px">{{ error }}</div>
+    {% endif %} {% if acao %}
+    <div style="margin-top: 20px">
+      {% include "components/painel_cotacao.html" %}
     </div>
 
-    {% if acao %}
-    <script>
-      // 1. Recebendo as listas do Python usando o Jinja2 (o filtro | safe garante que venha como Array do JS)
-      const rotulos = {{ datas_grafico | safe }};
-      const dadosPreco = {{ precos_grafico | safe }};
+    <!-- Preparando terreno para o futuro -->
+    <div
+      class="indicadores-toggles"
+      style="
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      "
+    >
+      <h3>Indicadores (Em breve)</h3>
+      <label style="display: block; opacity: 0.5"
+        ><input type="checkbox" disabled /> Agulhadas do Didi</label
+      >
+      <label style="display: block; opacity: 0.5"
+        ><input type="checkbox" disabled /> RSI (IFR)</label
+      >
+      <label style="display: block; opacity: 0.5"
+        ><input type="checkbox" disabled /> Estocástico</label
+      >
+    </div>
+    {% endif %}
+  </aside>
 
-      // 2. Configurando o Chart.js
-      const ctx = document.getElementById('meuGrafico').getContext('2d');
-      const meuGrafico = new Chart(ctx, {
-          type: 'line', // Tipo do gráfico (linha)
-          data: {
-              labels: rotulos, // Eixo X (Datas)
-              datasets: [{
-                  label: 'Preço de Fechamento (R$)',
-                  data: dadosPreco, // Eixo Y (Preços)
-                  borderColor: '#2563eb', // Cor da linha (o azul do nosso tema)
-                  backgroundColor: 'rgba(37, 99, 235, 0.1)', // Cor do preenchimento embaixo da linha
-                  borderWidth: 2,
-                  fill: true, // Preenche o espaço abaixo da linha
-                  tension: 0.3 // Deixa a linha curvada/suave em vez de reta e pontiaguda
-              }]
+  <!-- ÁREA PRINCIPAL (Gráficos) -->
+  <main class="chart-area">
+    {% if acao %}
+    <!-- Gráfico de Preço Principal -->
+    <div
+      class="chart-box main-chart"
+      style="display: flex; flex-direction: column; flex: 1; min-height: 0"
+    >
+      <div
+        class="chart-container"
+        style="flex: 1; width: 100%; position: relative"
+      >
+        <canvas id="meuGrafico"></canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico Secundário (RSI) -->
+    <div
+      class="chart-box secondary-chart"
+      style="
+        display: flex;
+        flex-direction: column;
+        height: 260px;
+        min-height: 260px;
+      "
+    >
+      <h4 style="margin-top: 0; margin-bottom: 10px; color: #475569">
+        RSI (14)
+      </h4>
+      <div
+        class="chart-container"
+        style="flex: 1; width: 100%; position: relative"
+      >
+        <canvas id="rsiGrafico"></canvas>
+      </div>
+    </div>
+
+    <!-- Espaços para o futuro (oculto) -->
+    <div class="chart-box secondary-chart" style="display: none"></div>
+
+    {% else %}
+    <!-- Tela em branco quando nenhum ticker foi pesquisado -->
+    <div
+      class="empty-state"
+      style="
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+      "
+    >
+      <h2>Aguardando busca de ativo...</h2>
+    </div>
+    {% endif %}
+  </main>
+</div>
+
+<!-- SCRIPT DO GRÁFICO ATUAL (Mantido para não quebrar) -->
+{% if acao %}
+<script>
+  const rotulos = {{ datas_grafico | safe }};
+  const dadosPreco = {{ precos_grafico | safe }};
+
+  const ctx = document.getElementById('meuGrafico').getContext('2d');
+  const meuGrafico = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: rotulos,
+          datasets: [{
+              label: 'Preço de Fechamento (R$)',
+              data: dadosPreco,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: false } }
+      }
+  });
+
+  const dadosRSI = {{ rsi_grafico | safe }};
+
+  // 2. Configura e desenha o gráfico inferior
+  const ctxRSI = document.getElementById('rsiGrafico').getContext('2d');
+  const rsiGrafico = new Chart(ctxRSI, {
+      type: 'line',
+      data: {
+          labels: rotulos, // Usamos as mesmas datas do gráfico de cima
+          datasets: [{
+              label: 'RSI',
+              data: dadosRSI,
+              borderColor: '#9333ea', // Uma cor roxa para diferenciar
+              backgroundColor: 'rgba(147, 51, 234, 0.1)',
+              borderWidth: 1.5,
+              pointRadius: 0, // Remove as bolinhas para ficar com cara de indicador profissional
+              tension: 0.2
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+              legend: { display: false }
           },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false, // Permite que o gráfico preencha a div chart-container
-              plugins: {
-                  legend: {
-                      display: false // Esconde a legenda extra para ficar mais limpo
-                  }
-              },
-              scales: {
-                  y: {
-                      beginAtZero: false // Não começa do zero para a variação ficar mais visível
+          scales: {
+              y: {
+                  min: 0,   // RSI sempre vai de 0...
+                  max: 100, // ...a 100
+                  ticks: {
+                      stepSize: 30 // Marcações no eixo Y (0, 30, 60, 90)
                   }
               }
           }
-      });
-    </script>
-    {% endif %}
-  </body>
-</html>
+      }
+  });
+</script>
+{% endif %} {% endblock %}

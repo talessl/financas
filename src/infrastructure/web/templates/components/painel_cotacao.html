@@ -1,0 +1,20 @@
+<section class="result-card">
+  <h2>Ativo: {{ acao.ticker }}</h2>
+
+  <div class="metrics-grid">
+    <div class="metric-item">
+      <span class="metric-label">Preço Atual</span>
+      <span class="metric-value"
+        >R$ {{ "%.2f"|format(acao.historico[-1].close) }}</span
+      >
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Máxima</span>
+      <span class="metric-value">R$ {{ "%.2f"|format(maxima) }}</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Mínima</span>
+      <span class="metric-value">R$ {{ "%.2f"|format(minima) }}</span>
+    </div>
+  </div>
+</section>

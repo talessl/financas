@@ -49,7 +49,17 @@
       </div>
       {% endif %} {% if lista_acoes %}
       <section class="result-card">
-        <h2>Resultados Encontrados</h2>
+        <div class="results-header">
+          <h2>Resultados Encontrados</h2>
+          <button type="button" class="copy-btn" id="copy-tickers-btn">
+            Copiar tickers
+          </button>
+        </div>
+        <div
+          class="copy-feedback"
+          id="copy-tickers-feedback"
+          aria-live="polite"
+        ></div>
 
         <div class="table-container">
           <table class="stocks-table">
@@ -59,16 +69,22 @@
                 <th>Empresa</th>
                 <th>Setor</th>
                 <th>Preço Atual</th>
+                <th>Min(30dias)</th>
+                <th>Max(30dias)</th>
                 <th style="text-align: center">Ação</th>
               </tr>
             </thead>
             <tbody>
               {% for acao in lista_acoes %}
-              <tr>
+              <tr {% if "%.2f"|format(acao.preco_atual) == "%.2f"|format(acao.minima) %} style="background-color: #dcfce7;" {% endif %}>
                 <td><strong>{{ acao.ticker }}</strong></td>
                 <td>{{ acao.nome }}</td>
                 <td>{{ acao.setor }}</td>
-                <td>R$ {{ "%.2f"|format(acao.preco) }}</td>
+                <td>R$ {{ "%.2f"|format(acao.preco_atual) }}</td>
+                <td>R$ {{ "%.2f"|format(acao.minima) }}</td>
+                <td>R$ {{ "%.2f"|format(acao.maxima) }}</td>
+                
+                </tr>
 
                 <td style="text-align: center">
                   <form action="/analisar" method="post" style="margin: 0">
@@ -98,5 +114,55 @@
       </section>
       {% endif %}
     </div>
+
+    <script>
+      const copyButton = document.getElementById("copy-tickers-btn");
+      const feedback = document.getElementById("copy-tickers-feedback");
+
+      if (copyButton) {
+        copyButton.addEventListener("click", async () => {
+          const tickers = Array.from(
+            document.querySelectorAll(
+              ".stocks-table tbody tr td:first-child strong",
+            ),
+          )
+            .map((element) => element.textContent.trim())
+            .filter(Boolean);
+
+          if (!tickers.length) {
+            feedback.textContent = "Nenhum ticker encontrado para copiar.";
+            feedback.className = "copy-feedback copy-feedback--error";
+            return;
+          }
+
+          const textToCopy = tickers.join("\n");
+
+          try {
+            await navigator.clipboard.writeText(textToCopy);
+            feedback.textContent = `Tickers copiados: ${tickers.length}`;
+            feedback.className = "copy-feedback copy-feedback--success";
+          } catch (error) {
+            const tempInput = document.createElement("textarea");
+            tempInput.value = textToCopy;
+            tempInput.setAttribute("readonly", "true");
+            tempInput.style.position = "absolute";
+            tempInput.style.left = "-9999px";
+            document.body.appendChild(tempInput);
+            tempInput.select();
+
+            try {
+              document.execCommand("copy");
+              feedback.textContent = `Tickers copiados: ${tickers.length}`;
+              feedback.className = "copy-feedback copy-feedback--success";
+            } catch (fallbackError) {
+              feedback.textContent = "Não foi possível copiar os tickers.";
+              feedback.className = "copy-feedback copy-feedback--error";
+            } finally {
+              document.body.removeChild(tempInput);
+            }
+          }
+        });
+      }
+    </script>
   </body>
 </html>
