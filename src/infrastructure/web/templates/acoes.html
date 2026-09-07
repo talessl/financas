@@ -16,29 +16,19 @@
       <a href="/" class="nav-link">← Voltar para a Home</a>
 
       <section class="search-box" style="text-align: center">
-        <h2 style="margin-bottom: 1rem; color: var(--text-main)">
-          Scanner de Oportunidades
-        </h2>
-        <p style="margin-bottom: 1.5rem; color: var(--text-muted)">
-          Filtra ações sobrevendidas: <strong>Estocástico Lento < 20</strong> e
-          <strong>IFR (RSI) < 30</strong>.
-        </p>
+  <h2 style="margin-bottom: 1rem; color: var(--text-main)">Scanner de Oportunidades</h2>
+  <p style="margin-bottom: 1.5rem; color: var(--text-muted)">
+    Filtra ações sobrevendidas: <strong>Estocástico Lento < 20</strong> e <strong>IFR (RSI) < 30</strong>.
+  </p>
 
-        <form
-          action="/buscar_acoes"
-          method="get"
-          class="search-form"
-          style="justify-content: center"
-        >
-          <button
-            type="submit"
-            class="search-btn"
-            style="padding: 1rem 2rem; font-size: 1.1rem"
-          >
-            🔍 Buscar Oportunidades Agora
-          </button>
-        </form>
-      </section>
+  <button id="btn-buscar" class="search-btn" style="padding: 1rem 2rem; font-size: 1.1rem; cursor: pointer;">
+    🔍 Buscar Oportunidades Agora
+  </button>
+
+  <!-- Caixa estilo terminal para mostrar os logs -->
+  <div id="log-terminal" style="display: none; text-align: left; background: #1e1e1e; color: #00ff00; padding: 1rem; border-radius: 8px; margin-top: 1rem; height: 250px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">
+  </div>
+</section>
 
       {% if error %}
       <div
@@ -110,6 +100,16 @@
               {% endfor %}
             </tbody>
           </table>
+          {% else %}
+  
+  <!-- FEEDBACK DE LISTA VAZIA -->
+  <div style="text-align: center; padding: 3rem 1rem; background: var(--bg-color, #1e1e1e); border-radius: 8px; margin-top: 2rem; border: 1px dashed #555;">
+    <h3 style="color: #ff9800; margin-bottom: 1rem;">Nenhuma oportunidade encontrada hoje 📉</h3>
+    <p style="color: #aaa; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+      Nenhuma ação da B3 atendeu aos critérios rigorosos da sua estratégia no momento (Estocástico &lt; 20 e RSI &lt; 30). <br><br>
+      Isso é absolutamente normal no mercado financeiro e significa apenas que não há ativos em zona extrema de sobrevenda hoje. Volte amanhã!
+    </p>
+  </div>
         </div>
       </section>
       {% endif %}
@@ -163,6 +163,50 @@
           }
         });
       }
+
+      const btnBuscar = document.getElementById('btn-buscar');
+  const terminal = document.getElementById('log-terminal');
+
+  if (btnBuscar && terminal) {
+    btnBuscar.addEventListener('click', function(e) {
+      e.preventDefault(); // Evita que a página recarregue caso o botão esteja num <form>
+
+      const btn = this;
+      
+      // Altera o visual do botão e mostra o terminal
+      btn.disabled = true;
+      btn.innerText = "⏳ Escaneando Mercado...";
+      terminal.style.display = 'block';
+      terminal.innerHTML = '';
+
+      // Conecta com a nova rota de Streaming do backend
+      const eventSource = new EventSource('/stream_scanner');
+
+      eventSource.onmessage = function(event) {
+        // Se o backend enviar [DONE], o processo acabou.
+        if (event.data === "[DONE]") {
+          eventSource.close();
+          window.location.href = "/buscar_acoes"; 
+          return;
+        }
+        
+        // Adiciona a nova linha de texto ao terminal
+        const novaLinha = document.createElement('div');
+        novaLinha.innerText = event.data;
+        terminal.appendChild(novaLinha);
+        
+        // Rola o terminal automaticamente para o final
+        terminal.scrollTop = terminal.scrollHeight;
+      };
+
+      eventSource.onerror = function() {
+        terminal.innerHTML += '<div style="color: red;">Erro na conexão com o servidor. Verifique se o Back-end está rodando.</div>';
+        eventSource.close();
+        btn.disabled = false;
+        btn.innerText = "🔍 Buscar Oportunidades Agora";
+      };
+    });
+  }
     </script>
   </body>
 </html>

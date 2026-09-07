@@ -3,6 +3,8 @@ from src.domain.use_cases.analisar_acao import AnalisarAcao
 import sys
 import os
 from fastapi import FastAPI, Request, Form
+from fastapi.responses import StreamingResponse
+import asyncio
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -50,6 +52,52 @@ async def home(request: Request):
     return templates.TemplateResponse("acoes.html", {"request": request})
 
 
+@app.get("/stream_scanner")
+async def stream_scanner():
+    async def gerador():
+        agora = datetime.now()
+
+        # 1. Checa o cache primeiro
+        if SCANNER_CACHE.get("expira_em") and SCANNER_CACHE["expira_em"] > agora:
+            yield "data: 🚀 Dados em cache encontrados! Redirecionando...\n\n"
+            yield "data: [DONE]\n\n"
+            return
+
+        yield "data: ⏳ Baixando lista da B3 (Fundamentus)...\n\n"
+        await asyncio.sleep(0.1)  # Força o envio imediato da mensagem
+
+        # 2. Busca na B3
+        df_b3 = fundamentus.get_resultado()
+        df_baratas = df_b3[(df_b3['cotacao'] > 0) & (
+            df_b3['cotacao'] <= 10.0) & (df_b3['liq2m'] > 1000000)]
+        tickers = [f"{ticker}.SA" for ticker in df_baratas.index]
+
+        yield f"data: 📊 {len(tickers)} ações baratas encontradas. Iniciando análise técnica...\n\n"
+        await asyncio.sleep(0.1)
+
+        # 3. Executa o Scanner
+        use_case = get_use_case()
+        acoes_aprovadas = []
+
+        # O backend "ouve" o gerador e repassa para o frontend
+        for item in use_case.escanear_oportunidades(tickers, preco_maximo=10.0):
+            if isinstance(item, dict) and "acao_aprovada" in item:
+                acoes_aprovadas.append(item["acao_aprovada"])
+            else:
+                yield f"data: {item}\n\n"
+                # Pausa mínima para o navegador processar o visual
+                await asyncio.sleep(0.01)
+
+        # 4. Salva no cache e avisa o navegador para terminar
+        SCANNER_CACHE["dados"] = acoes_aprovadas
+        SCANNER_CACHE["expira_em"] = agora + timedelta(minutes=15)
+
+        yield "data: ✅ Análise concluída! Redirecionando...\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(gerador(), media_type="text/event-stream")
+
+
 @app.get("/buscar_acoes", response_class=HTMLResponse)
 async def buscar_acoes(request: Request):
     """Rota que executa o Scanner com Cache de Performance"""
@@ -75,8 +123,12 @@ async def buscar_acoes(request: Request):
 
         tickers_para_escanear = [f"{ticker}.SA" for ticker in df_baratas.index]
 
-        acoes_filtradas = use_case.escanear_oportunidades(
+        gerador_resultados = use_case.escanear_oportunidades(
             tickers=tickers_para_escanear, preco_maximo=10.0)
+        acoes_filtradas = []
+        for item in gerador_resultados:
+            if isinstance(item, dict) and "acao_aprovada" in item:
+                acoes_filtradas.append(item["acao_aprovada"])
 
         SCANNER_CACHE["dados"] = acoes_filtradas
         SCANNER_CACHE["expira_em"] = agora + timedelta(minutes=15)

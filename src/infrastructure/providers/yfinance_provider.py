@@ -2,40 +2,24 @@ import yfinance as yf
 from datetime import date
 from typing import List, Dict
 from src.domain.provider_interface import IDataProvider
-from src.domain.value_objects.market_data import MarketData
 import pandas as pd
-import pandas_ta as ta
 
 
 class YFinanceProvider(IDataProvider):
-    def _baixar_dados(self, ticker: str, inicio: date, fim: date) -> List[MarketData]:
-        """Faz o download e envelopa os dados estritamente em objetos MarketData."""
+    def _baixar_dados(self, ticker: str, inicio: date, fim: date):
+        """Faz o download e retorna o DataFrame do Pandas puro para análise técnica."""
         start_str = inicio.strftime('%Y-%m-%d')
         end_str = fim.strftime('%Y-%m-%d')
 
         df = yf.download(ticker, start=start_str, end=end_str, progress=False)
 
         if df.empty:
-            return []
+            return df
 
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.droplevel(1)
 
-        lista_market_data = []
-
-        # Itera pelas linhas do DataFrame para criar os seus Value Objects reais
-        for data_registro, linha in df.iterrows():
-            # Lembrete: O yfinance traz as colunas com a primeira letra maiúscula ('Close', 'High', 'Low')
-            # A data vem direto do índice (data_registro)
-            dado = MarketData(
-                data=data_registro.date() if hasattr(data_registro, 'date') else data_registro,
-                close=float(linha['Close']),
-                high=float(linha['High']),
-                low=float(linha['Low'])
-            )
-            lista_market_data.append(dado)
-
-        return lista_market_data
+        return df
 
     def _obter_preco_valido(self, df: pd.DataFrame, preco_maximo: float) -> float:
         """Retorna o preço atual se estiver dentro do limite, ou None caso contrário."""
@@ -74,42 +58,34 @@ class YFinanceProvider(IDataProvider):
             "precos_grafico": [float(preco) for preco in df_30_dias['Close']]
         }
 
-    def escanear_oportunidades(self, tickers: List[str], inicio: date, fim: date, preco_maximo: float) -> List[Dict]:
+    def escanear_oportunidades(self, tickers: List[str], inicio: date, fim: date, preco_maximo: float):
         """Método principal que orquestra todo o fluxo do scanner."""
-        acoes_aprovadas = []
-
         for ticker in tickers:
             try:
-                # 1. Download dos dados
                 df = self._baixar_dados(ticker, inicio, fim)
                 if df.empty:
                     continue
 
-                # 2. Filtro de preço antecipado
                 preco_atual = self._obter_preco_valido(df, preco_maximo)
                 if preco_atual is None:
-                    print(
-                        f"  ✗ {ticker}: (Acima de R$ {preco_maximo:.2f}) - IGNORADO")
+                    yield f"✗ {ticker}: (Acima de R$ {preco_maximo:.2f}) - IGNORADO"
                     continue
 
-                # 3. Cálculo matemático (só ocorre se passou no filtro de preço)
                 df = self._calcular_indicadores(df)
 
-                # 4. Logs de acompanhamento (opcional, mantido do seu código original)
                 rsi_ultimo = df['RSI'].dropna().iloc[-1]
                 stoch_d_ultimo = df['STOCHd_14_3_3'].dropna().iloc[-1]
-                print(
-                    f"  ➔ {ticker}: Preço R$ {preco_atual:.2f} | RSI: {rsi_ultimo:.2f} | Estocástico: {stoch_d_ultimo:.2f}")
 
-                # 5. Validação da estratégia e montagem do resultado
+                # Entrega o texto do log para a tela
+                yield f"➔ {ticker}: Preço R$ {preco_atual:.2f} | RSI: {rsi_ultimo:.2f} | Estoc: {stoch_d_ultimo:.2f}"
+
                 if self._verificar_estrategia(df):
                     dados_acao = self._montar_dicionario_aprovado(
                         ticker, df, preco_atual)
-                    acoes_aprovadas.append(dados_acao)
-                    print(f"  ✓✓ 🎯 {ticker} APROVADO NO SCANNER!")
+                    yield f"✓✓ 🎯 {ticker} APROVADO NO SCANNER!"
+                    # Entrega um dicionário quando achar uma ação válida
+                    yield {"acao_aprovada": dados_acao}
 
             except Exception as e:
-                print(f"Erro ao processar {ticker}: {e}")
+                yield f"Erro ao processar {ticker}: {e}"
                 continue
-
-        return acoes_aprovadas
