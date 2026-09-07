@@ -1,2 +1,46 @@
+# ========================
+# 🐍 Python
+# ========================
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ========================
+# 📦 Ambientes Virtuais
+# ========================
 .venv/
+venv/
+env/
+ENV/
+
+# ========================
+# 🗄️ Bancos de Dados Local
+# ========================
+# Evita subir o histórico de transações e inflar o repositório
+*.sqlite
+*.sqlite3
+*.db
+dados.sqlite
+
+# ========================
+# 🔐 Segredos e Configurações
+# ========================
+# NUNCA suba chaves secretas (SECRET_KEY) para o GitHub!
+.env
+.env.*
+
+# ========================
+# 💻 IDEs e Sistema
+# ========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ========================
+# 📝 Logs e Caches
+# ========================
+*.log
+.pytest_cache/
+.mypy_cache/
