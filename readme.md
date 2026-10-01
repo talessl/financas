@@ -1,113 +1,59 @@
-# Guia de Execução
+# Dashboard Financeiro: Home Broker B3
 
-O código foi feito em python. É indicado a utilização de um virtual environment para a instalação das bibliotecas pré-requisitadas. Para isso, execute o código:
+Aplicação web para análise de ações da B3. Busca o histórico de preços, calcula indicadores técnicos e varre o mercado em busca de ativos em sobrevenda.
 
-```
-python -m venv venv
-```
+**Stack:** Python, FastAPI, Jinja2, Fundamentus (dados de mercado) e pandas-ta (indicadores).
 
-e depois, utilize o requiremets do projeto:
+## Funcionalidades
 
-```
-pip install -r requirements.txt
-```
+- **Busca de ações:** mostra preço atual, máxima e mínima dos últimos 30 dias. Não precisa de formatação: para `DASA3`, digite `dasa3`.
+- **Visualizar Ações do Dia (scanner):** aplica a estratégia abaixo a todas as ações da B3 e lista as que passam no filtro.
 
-Com o ambiente configurado, abra o prompt na raiz do projeto (\financas) e execute o comando:
+## Como executar
 
-```
-uvicorn src.infrastructure.web.main:app --reload
-```
+1. Crie e ative o ambiente virtual:
 
-A página principal é uma simples pesquisa da ação desejada, com informações referente ao preço atual, máxima (30 dias) e mínima (30 dias).
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate        # Windows
+   source venv/bin/activate     # Linux/macOS
+   ```
 
-Não é necessária formatação para pesquisa.
-Ex: Para pesquisar por DASA.3, basta digitar dasa3.
+2. Instale as dependências:
 
-A opção "Visualizar Ações do Dia", tem por objetivo aplicar um filtro de Estocástico Lento < 20 e IFR (RSI) < 30 para todas as ações da B3.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Obs: Melhoria de experiência de consulta de ações em desenvolvimento.
+3. Na raiz do projeto (`financas`), inicie o servidor:
 
-## Livro de Estratégias e Indicadores de Análise Técnica
+   ```bash
+   uvicorn src.infrastructure.web.main:app --reload
+   ```
 
-Este documento centraliza as definições de indicadores técnicos e os códigos para implementação.
+4. Acesse `http://127.0.0.1:8000` no navegador.
 
-## 1. Definições de Indicadores Técnicos
+## Estratégia do scanner
 
-Uma referência rápida sobre os principais indicadores utilizados.
+Procura ações em **sobrevenda**, com preço abaixo de R$ 10:
 
-### DIDI Index
+- Estocástico Lento **< 20**
+- IFR (RSI) **< 30**
 
-- **Composição:** Baseado nos preços de fechamento de um ativo, utilizando médias móveis de 3, 8 e 20 períodos.
-- **Conceito Principal:** Identificação de "agulhadas", que são cruzamentos específicos das médias.
-- **Sinais:**
-  - **Agulhada de Alta (Compra):** A média de 3 cruza as médias de 8 e 20 para cima.
-  - **Agulhada de Baixa (Venda):** A média de 3 cruza as médias de 8 e 20 para baixo.
-- **Contexto de Tendência:**
-  - **Acima de zero:** Sugere tendência de alta.
-  - **Abaixo de zero:** Sugere tendência de baixa.
+São necessários pelo menos 30 períodos de histórico para calcular os indicadores.
 
-### ADX (Average Directional Index)
+## Indicadores
 
-- **Função:** Mede a **força** da tendência, numa escala de 0 a 100 (não indica a direção).
-- **Interpretação da Força:**
-  - **Abaixo de 20:** Ausência de tendência ou tendência fraca.
-  - **Acima de 25:** Sugere uma tendência forte.
-- **Componentes (Direção):**
-  - `DI+`: Mede a força da tendência de alta.
-  - `DI-`: Mede a força da tendência de baixa.
-- **Análise Combinada:**
-  - Quanto mais alto o ADX, mais forte é a tendência (seja ela de alta ou baixa).
-  - Se `DI+` está acima de `DI-`, o mercado está em tendência de alta.
-  - Se `DI-` está acima de `DI+`, o mercado está em tendência de baixa.
+| Indicador | O que mede | Como ler |
+| --- | --- | --- |
+| **IFR (RSI)** | Velocidade das variações de preço (0 a 100) | Acima de 70: sobrecompra. Abaixo de 30: sobrevenda. |
+| **Estocástico Lento** | Posição do fechamento dentro da faixa recente (linhas %K e %D) | Acima de 80: sobrecompra. Abaixo de 20: sobrevenda. Cruzamento de %K sobre %D indica compra ou venda. |
+| **DIDI Index** | Médias móveis de 3, 8 e 20 períodos | "Agulhada": a média de 3 cruza as outras duas, para cima (alta) ou para baixo (baixa). |
+| **ADX** | Força da tendência (0 a 100), sem indicar a direção | Abaixo de 20: sem tendência. Acima de 25: tendência forte. `DI+` acima de `DI-` indica alta. |
+| **TRIX** | Momentum filtrado por três médias exponenciais | Cruza o zero para cima: compra. Para baixo: venda. |
+| **Volume** | Quantidade negociada | Confirma a força do movimento de preço. |
 
-### TRIX (Triple Exponential Average)
+## Próximos passos
 
-- **Composição:** Baseado em três médias móveis exponenciais.
-- **Função:** Oscilador de momentum que filtra ruídos do mercado.
-- **Sinais (Cruzamento de Zero):**
-  - **Sinal de Compra:** Quando o TRIX cruza a linha zero para cima.
-  - **Sinal de Venda:** Quando o TRIX cruza a linha zero para baixo.
-
-### Estocástico Lento
-
-- **Composição:** Composto por duas linhas:
-  - **%K:** Média móvel da linha %K do estocástico rápido.
-  - **%D:** Média móvel da linha %K (lenta).
-- **Zonas de Interesse:**
-  - **Sobrecompra:** Níveis próximos ou acima de 80.
-  - **Sobrevenda:** Níveis próximos ou abaixo de 20.
-- **Sinais de Cruzamento:**
-  - **Sinal de Compra:** Linha %K cruza a linha %D para cima (especialmente saindo da zona de sobrevenda).
-  - **Sinal de Venda:** Linha %K cruza a linha %D para baixo (especialmente saindo da zona de sobrecompra).
-- **Contexto de Tendência:**
-  - **Tendência de Alta:** As linhas %K e %D tendem a se manter acima do nível 20.
-  - **Tendência de Baixa:** As linhas %K e %D tendem a se manter abaixo do nível 80.
-
-### IFR (RSI - Índice de Força Relativa)
-
-- **Função:** Oscilador de momentum que mede a velocidade e a mudança dos movimentos de preços, numa escala de 0 a 100.
-- **Zonas de Interesse:**
-  - **Sobrecompra:** Níveis acima de 70 (sugere que o preço está alto, possível reversão para queda).
-  - **Sobrevenda:** Níveis abaixo de 30 (sugere que o preço está baixo, possível reversão para alta).
-
-### Volume
-
-- **Função:** Mede a quantidade de ações ou contratos negociados em um período. Confirma a força de um movimento de preço.
-
----
-
-## 2. Estratégia de Rastreamento (Scanner)
-
-Combinação de filtros fundamentalistas e técnicos para encontrar ações com potencial.
-
-### Etapa 1: Filtros Essenciais (Qualidade e Perfil)
-
-Filtros não negociáveis para encontrar o tipo certo de empresa (GARP - Growth at a Reasonable Price).
-
-### Etapa 2: Filtros de Cenário Técnico (Timing)
-
-Filtros para encontrar ações que estão em um estado técnico neutro ou "prontas para a ignição". Necessário ao menos 30 períodos.
-
-#### Estratégia atual
-
-Estocástico Lento abaixo de 20 e IFR (RSI) abaixo de 30.
+- Filtros fundamentalistas para o scanner (perfil GARP: crescimento a preço razoável).
+- Melhorias na experiência de consulta das ações.
